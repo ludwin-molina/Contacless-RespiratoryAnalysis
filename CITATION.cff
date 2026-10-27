@@ -1,0 +1,56 @@
+cff-version: 1.2.0
+message: If you use this platform or these recordings, please cite the paper and the dataset.
+title: Contactless respiratory rate from RGB optical flow and ToF depth
+type: software
+license: MIT
+authors:
+  - family-names: Jasiówka
+    given-names: Dominik
+    affiliation: AGH University of Krakow
+  - family-names: Molina Arias
+    given-names: Ludwin
+    affiliation: AGH University of Krakow
+    email: arias@agh.edu.pl
+  - family-names: Ciężarek
+    given-names: Patryk
+    affiliation: Jagiellonian University Medical College
+  - family-names: Żyźnawska
+    given-names: Joanna
+    affiliation: Jagiellonian University Medical College
+contact:
+  - family-names: Molina Arias
+    given-names: Ludwin
+    affiliation: AGH University of Krakow
+    email: arias@agh.edu.pl
+preferred-citation:
+  type: article
+  title: A real-time low-cost platform for non-contact respiratory rate monitoring
+  authors:
+    - family-names: Jasiówka
+      given-names: Dominik
+    - family-names: Molina Arias
+      given-names: Ludwin
+    - family-names: Ciężarek
+      given-names: Patryk
+    - family-names: Żyźnawska
+      given-names: Joanna
+  journal: Computers in Biology and Medicine
+  year: 2026
+references:
+  - type: dataset
+    title: Contactless respiratory rate from RGB optical flow and ToF depth
+    year: 2026
+    license: CC-BY-4.0
+    authors:
+      - family-names: Jasiówka
+        given-names: Dominik
+        affiliation: AGH University of Krakow
+      - family-names: Molina Arias
+        given-names: Ludwin
+        affiliation: AGH University of Krakow
+      - family-names: Ciężarek
+        given-names: Patryk
+        affiliation: Jagiellonian University Medical College
+      - family-names: Żyźnawska
+        given-names: Joanna
+        affiliation: Jagiellonian University Medical College
