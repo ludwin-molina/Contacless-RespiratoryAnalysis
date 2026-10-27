@@ -1,0 +1,2 @@
+Version,Subject,Recording,Startdate,Startime,Bytes,Reserved,NumRec,Duration,NumSig
+0       ,S08                                                                             ,S08 / Recorded with Neurobit Optima+ 4 BLE                                      ,06.05.26,14.47.52,512     ,                                            ,339,1.024   ,1

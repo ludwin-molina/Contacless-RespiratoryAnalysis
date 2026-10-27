@@ -1,2 +1,0 @@
-Version,Subject,Recording,Startdate,Startime,Bytes,Reserved,NumRec,Duration,NumSig
-0       ,adrian                                                                          ,adrian / Recorded with Neurobit Optima+ 4 BLE                                   ,05.05.26,15.11.39,512     ,                                            ,315,1.024   ,1

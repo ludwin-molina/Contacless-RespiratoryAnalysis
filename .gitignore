@@ -1,0 +1,14 @@
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+
+acquisition/rgb/recordings/
+acquisition/tof/recordings/
+
+results/*
+!results/.gitkeep
+
+data/private/
