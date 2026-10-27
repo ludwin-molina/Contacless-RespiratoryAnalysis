@@ -1,0 +1,2 @@
+Version,Subject,Recording,Startdate,Startime,Bytes,Reserved,NumRec,Duration,NumSig
+0       ,pacjent                                                                         ,pacjent / Recorded with Neurobit Optima+ 4 BLE                                  ,06.05.26,14.29.46,512     ,                                            ,313,1.024   ,1

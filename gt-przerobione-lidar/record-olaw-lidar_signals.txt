@@ -1,0 +1,2 @@
+Signal,Label,Transducer,Units,Min,Max,Dmin,Dmax,PreFilter,Smp/Rec,Reserved
+1,A:a             ,resistance                                                                      ,kOhm    ,0.000000,124.996000,0,32767,HP:0Hz LP:5.78125Hz                                                             ,16,                                
