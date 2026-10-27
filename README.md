@@ -10,7 +10,7 @@ Twelve volunteers were recorded with a MaixSense A075V, once with the RGB camera
 - `data/reference`: reference rate. A breath-hold is stored as 0 breaths per minute. The original click times were not kept.
 - `data/manifest.csv`: which camera file belongs to which person. Pairing follows the belt header time.
 - `data/annotations/phases.csv`: apnea and hyperventilation windows segmented from the reference rate. The belt annotation files are empty.
-- `deposit`: comma-separated package for RODBUK, with subject codes S01–S12 and `00_readme.txt`. Rebuild it with `python -m analysis.export_deposit`.
+- `deposit`: flat file list for the RODBUK Files tab, with subject codes S01–S12 and `00_readme.txt`. Rebuild it with `python -m analysis.export_deposit`.
 - `data/reference/legacy_synced`: archived synchronization, used to check that the new pipeline has not drifted.
 - `analysis`: 20 Hz synchronization, Spearman correlation, respiratory-rate error, Bland–Altman, phase error, and apnea at 1 Hz.
 - `results`: tables and figures. The folder is not versioned. Running the analysis recreates it.

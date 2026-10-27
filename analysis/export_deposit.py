@@ -1,8 +1,8 @@
-"""Build the RODBUK deposit package.
+"""Build the RODBUK deposit as one flat list of files.
 
-The package follows the RODBUK data-preparation guide: content-based folder
-names, comma-separated tables, ISO dates, multi-digit participant codes, and
-a 00_readme.txt. Vendor EDF files and empty annotation files are left out.
+The web form stores files, not folders. Names sort the documentation ahead of
+the signals. Tables are comma-separated, dates are ISO, and participant codes
+are S01-S12. Vendor EDF files and empty annotation files are left out.
 """
 
 import csv
@@ -69,7 +69,7 @@ def _readme(codes):
 Contactless respiratory rate from RGB optical flow and ToF depth, with a piezoresistive chest belt
 
 Description
-Simultaneous belt and camera recordings from 12 adult volunteers. Each person completed two separate sessions with a MaixSense A075V: one with the RGB camera (three optical-flow methods) and one with the time-of-flight depth sensor. The reference in every session is a Neurobit Optima+ 4 BLE resistance belt on the chest.
+Respiratory signals from 12 adult volunteers, stored as comma-separated tables and coded S01-S12. The package does not contain video or raw image frames. Each person completed two separate sessions with a MaixSense A075V. In the RGB session the device stored the chest signal from Farnebäck, Horn–Schunck, and Lucas–Kanade optical flow. In the time-of-flight session it stored the respiratory signal derived from depth. A Neurobit Optima+ 4 BLE resistance belt was recorded at the same time and is the reference. The protocol is resting breathing, voluntary hyperventilation, and a breath-hold used to simulate apnea. Column definitions and the protocol windows are in 00_readme.txt.
 
 Research objective
 Compare contactless respiratory-rate estimates with the belt during resting breathing, voluntary hyperventilation, and a breath-hold used to simulate apnea.
@@ -84,19 +84,19 @@ Contact
 Ludwin Molina Arias, AGH University of Krakow, arias@agh.edu.pl
 
 Timeframe
-2026-05-03 to 2026-05-09. Session start times are in 01_metadata/recordings.csv.
+2026-05-03 to 2026-05-09. Session start times are in 02_recordings.csv.
 
 License
-Proposed for deposit: Creative Commons Attribution 4.0 International (CC BY 4.0). Confirm the license in the RODBUK form before publishing.
+RODBUK assigns CC0 when a dataset is saved. Change that license in the form if another licence should apply. The licence proposed for this dataset is Creative Commons Attribution 4.0 International (CC BY 4.0).
 
 Participant codes
 Signals use codes S01 to S12 in acquisition order: {order}.
-The package does not contain names. 01_metadata/participants.csv lists the same codes with the session date and time only.
+The package does not contain names. 01_participants.csv lists the same codes with the session date and time only.
 
 Protocol
 Each recording starts with resting breathing. The volunteer then hyperventilates, returns toward the resting rate, holds the breath for about 30 s, and breathes again. The breath-hold is the apnea interval. Recovery after the hold is not a protocol phase.
 
-The belt annotation files exported by the recorder contain only the header Onset,Duration,Annotation. The clicks used in the manuscript were not stored. Intervals in 01_metadata/protocol_phases.csv were segmented from the reference respiratory rate, on the belt clock (seconds from the first belt sample):
+The belt annotation files exported by the recorder contain only the header Onset,Duration,Annotation. The clicks used in the manuscript were not stored. Intervals in 03_protocol-phases.csv were segmented from the reference respiratory rate, on the belt clock (seconds from the first belt sample):
 
 - apnea is the longest stretch at 0 breaths per minute that lasts at least 10 s
 - hyperventilation is the tallest smoothed bout before that stretch
@@ -108,28 +108,63 @@ The RGB session of S08 has no bout that meets the hyperventilation rule. Those t
 
 One ToF session, S04, has a device respiratory rate that stays near 54 breaths per minute after the opening seconds, while the belt stays near the resting rate. Its whole-recording error is about 37 breaths per minute. That session is part of the cohort behind Table 4. The article figure draws the axis only up to about 12 breaths per minute, so the point lies above the frame. The first 20 seconds of that recording agree with the belt. The same check on the other ToF sessions shows that the opening and closing 20 seconds are not systematically worse than the middle of the recording.
 
-Folder structure
-00_readme.txt
-    This file. It describes the whole dataset.
-01_metadata/
-    participants.csv, recordings.csv, protocol_phases.csv, files.csv
-02_reference-belt/
-    Raw belt resistance and the processed reference rate. One file per session.
-03_rgb-optical-flow/
-    Farneback, Horn-Schunck, and Lucas-Kanade signals from the RGB session.
-04_tof-depth/
-    Depth signal from the separate ToF session.
+Files in this package
+The RODBUK form accepts files. Upload every file in this folder. Do not upload the folder as a directory. The list sorts alphabetically, so the documentation comes first.
 
-File names
-RR_<source>_<method>_Sxx_YYYYMMDD.csv
+00_readme.txt
+    This file.
+01_participants.csv
+    Codes S01-S12 and the start of each session. No names.
+02_recordings.csv
+    Belt settings and sample timing.
+03_protocol-phases.csv
+    Segmented apnea and hyperventilation windows on the belt clock.
+04_file-list.csv
+    One row per file, with the description and the tag to type into the Files tab.
+
+Signal files use the pattern RR_<source>_<method>_Sxx_YYYYMMDD.csv.
 Examples:
-    02_reference-belt/RR_BeltRaw_S05_Rgb_20260505.csv
-    02_reference-belt/RR_BeltProcessed_S05_Rgb_20260505.csv
-    03_rgb-optical-flow/RR_Rgb_Farneback_S05_20260505.csv
-    03_rgb-optical-flow/RR_Rgb_Horn-Schunck_S05_20260505.csv
-    03_rgb-optical-flow/RR_Rgb_Lucas-Kanade_S05_20260505.csv
-    04_tof-depth/RR_Tof_S05_20260505.csv
-YYYYMMDD is the date in the sensor file name. Sxx is the participant code. Names use digits, letters, hyphens, and underscores.
+    RR_BeltRaw_S05_Rgb_20260505.csv
+    RR_BeltProcessed_S05_Rgb_20260505.csv
+    RR_Rgb_Farneback_S05_20260505.csv
+    RR_Rgb_Horn-Schunck_S05_20260505.csv
+    RR_Rgb_Lucas-Kanade_S05_20260505.csv
+    RR_Tof_S05_20260505.csv
+YYYYMMDD is the date in the sensor file name. Sxx is the participant code. Rgb and Tof in a belt name are the two separate sessions. Names use digits, letters, hyphens, and underscores.
+
+How to fill the RODBUK form
+Keep the metadata language set to English. Changing the language clears the form.
+
+Title
+Contactless respiratory rate from RGB optical flow and ToF depth, with a piezoresistive chest belt
+
+Authors
+Dominik Jasiówka. AGH University of Krakow.
+Ludwin Molina Arias. AGH University of Krakow. Contact: arias@agh.edu.pl.
+Patryk Ciężarek. Jagiellonian University Medical College.
+Joanna Żyźnawska. Jagiellonian University Medical College.
+Add each ORCID in the form where you have it. This package does not record ORCID identifiers.
+
+Summary of the project
+This project evaluates a low-cost, contactless platform for respiratory-rate monitoring. Twelve adult volunteers each completed two sessions with a MaixSense A075V, because the RGB camera and the time-of-flight depth sensor cannot stream together. The deposited files are the respiratory signals already computed on the device, not the camera video. For RGB, those signals come from Farnebäck, Horn–Schunck, and Lucas–Kanade optical flow. For time-of-flight, the signal is the depth-derived chest motion. A Neurobit Optima+ 4 BLE piezoresistive chest belt was recorded at the same time as the reference. The protocol included resting breathing, voluntary hyperventilation, and breath-hold periods used to simulate apnea, so respiratory-rate estimation and apnea detection can be compared with the belt for each modality. Data were collected from 3 to 9 May 2026 by the Department of Biocybernetics and Biomedical Engineering at AGH University of Krakow and the Institute of Physiotherapy at Jagiellonian University Medical College.
+
+Description
+Copy the Description and Research objective sections above.
+
+Subject
+Medicine, Health and Life Sciences
+
+Keywords
+respiratory rate; contactless monitoring; optical flow; time-of-flight; apnea; hyperventilation; chest belt
+
+Related publication
+A Real-Time Low-Cost Platform for Non-Contact Respiratory Rate Monitoring. Computers in Biology and Medicine. Add the DOI in the form when it exists.
+
+Time period covered
+2026-05-03 to 2026-05-09
+
+Files tab
+Select all files from this folder. For each file, copy description and rodbuk_tag from 04_file-list.csv. Use Documentation for the readme and the four tables. Use Data for every RR_ file. None of the files exceeds 4 GB. Save the dataset. It remains a draft, with an inactive DOI, until a data steward publishes it.
 
 Formats
 All tables are UTF-8 comma-separated values with a header row. Open them in any spreadsheet or with pandas.read_csv. No EDF files are included: the Neurobit text export is the open copy of the same resistance samples. Empty annotation files are not included.
@@ -137,7 +172,7 @@ All tables are UTF-8 comma-separated values with a header row. Open them in any 
 Belt raw columns
 Time_s: seconds from the first sample
 Resistance_kOhm: chest-belt resistance in kilohms
-Sample period 0.064 s (16 samples in each 1.024 s record, 15.625 Hz). Hardware filters are in recordings.csv (high-pass 0 Hz, low-pass 5.78125 Hz).
+Sample period 0.064 s (16 samples in each 1.024 s record, 15.625 Hz). Hardware filters are in 02_recordings.csv (high-pass 0 Hz, low-pass 5.78125 Hz).
 
 Belt processed columns
 Time_s: same clock as the raw file
@@ -151,7 +186,7 @@ Elapsed_s: seconds from the start of the sensor file
 OpticalFlow: chest motion from the named optical-flow method, arbitrary units
 OpticalFlow_sd: spread of that motion inside the frame
 RespiratoryRate_bpm: rate estimated on the device
-IsApnea: device flag, 1 or 0. This is not the protocol breath-hold. Use protocol_phases.csv for the protocol interval.
+IsApnea: device flag, 1 or 0. This is not the protocol breath-hold. Use 03_protocol-phases.csv for the protocol interval.
 
 ToF columns
 TimeUnix_s, Elapsed_s: same meaning as the RGB files
@@ -172,8 +207,18 @@ A text editor or spreadsheet for the CSV files. Python with pandas is enough to 
 """
 
 
-def _folder_readme(title, body):
-    return f"{title}\n\n{body}\n\nSee ../00_readme.txt for the dataset description, columns, and protocol.\n"
+def _describe(role, code, modality, method, date):
+    iso = f"{date[:4]}-{date[4:6]}-{date[6:8]}"
+    session = "RGB" if modality == "rgb" else "ToF"
+    if role == "belt-raw":
+        text = f"Raw chest-belt resistance for participant {code}, {session} session, {iso}."
+    elif role == "belt-processed":
+        text = f"Filtered chest-belt signal and reference respiratory rate for participant {code}, {session} session, {iso}."
+    elif modality == "rgb":
+        text = f"{method} optical-flow respiratory signal for participant {code}, RGB session, {iso}."
+    else:
+        text = f"ToF depth respiratory signal for participant {code}, {iso}."
+    return text
 
 
 def export_deposit():
@@ -222,11 +267,7 @@ def export_deposit():
             sample_period = float(header["Duration"]) / float(signals["Smp/Rec"])
             raw_lines = _body(belt_dir / f"record-{record.subject}-{modality}_data.txt")
             raw_name = f"RR_BeltRaw_{code}_{modality.capitalize()}_{date}.csv"
-            raw_rel = _write_exact(
-                DEPOSIT / "02_reference-belt" / raw_name,
-                "Time_s,Resistance_kOhm",
-                raw_lines,
-            )
+            raw_rel = _write_exact(DEPOSIT / raw_name, "Time_s,Resistance_kOhm", raw_lines)
             file_rows.append(
                 {
                     "file_name": raw_rel,
@@ -236,12 +277,14 @@ def export_deposit():
                     "role": "belt-raw",
                     "rows": len(raw_lines),
                     "columns": "Time_s,Resistance_kOhm",
+                    "description": _describe("belt-raw", code, modality, "", date),
+                    "rodbuk_tag": "Data",
                 }
             )
             processed_lines = _body(ROOT / record.reference_file)
             processed_name = f"RR_BeltProcessed_{code}_{modality.capitalize()}_{date}.csv"
             processed_rel = _write_exact(
-                DEPOSIT / "02_reference-belt" / processed_name,
+                DEPOSIT / processed_name,
                 "Time_s,Resistance_kOhm,Filtered,RespiratoryRate_bpm",
                 processed_lines,
             )
@@ -254,6 +297,8 @@ def export_deposit():
                     "role": "belt-processed",
                     "rows": len(processed_lines),
                     "columns": "Time_s,Resistance_kOhm,Filtered,RespiratoryRate_bpm",
+                    "description": _describe("belt-processed", code, modality, "", date),
+                    "rodbuk_tag": "Data",
                 }
             )
             recording_rows.append(
@@ -281,16 +326,14 @@ def export_deposit():
         if len(sensor_lines) != n_samples:
             raise ValueError(f"Row count mismatch in {record.sensor_file}")
         if modality == "rgb":
-            folder = "03_rgb-optical-flow"
             method_token = record.method
             header_line = "TimeUnix_s,Elapsed_s,OpticalFlow,OpticalFlow_sd,RespiratoryRate_bpm,IsApnea"
             file_name = f"RR_Rgb_{method_token}_{code}_{date}.csv"
         else:
-            folder = "04_tof-depth"
             method_token = "Tof"
             header_line = "TimeUnix_s,Elapsed_s,Distance_mm,DistanceFiltered,RespiratoryRate_bpm,IsApnea"
             file_name = f"RR_Tof_{code}_{date}.csv"
-        relative = _write_exact(DEPOSIT / folder / file_name, header_line, sensor_lines)
+        relative = _write_exact(DEPOSIT / file_name, header_line, sensor_lines)
         file_rows.append(
             {
                 "file_name": relative,
@@ -300,6 +343,8 @@ def export_deposit():
                 "role": "sensor",
                 "rows": n_samples,
                 "columns": header_line,
+                "description": _describe("sensor", code, modality, method_token, date),
+                "rodbuk_tag": "Data",
             }
         )
         session = recording_rows[recording_index[session_key]]
@@ -314,54 +359,75 @@ def export_deposit():
     missing = phase_out["hyperventilation_start_s"].isna()
     phase_out.loc[missing, "note"] = "no hyperventilation bout met the 4 BPM rule"
 
-    metadata = DEPOSIT / "01_metadata"
-    metadata.mkdir(parents=True)
-    pd.DataFrame(participant_rows).to_csv(metadata / "participants.csv", index=False)
-    pd.DataFrame(recording_rows).to_csv(metadata / "recordings.csv", index=False)
-    phase_out.to_csv(metadata / "protocol_phases.csv", index=False)
-    pd.DataFrame(file_rows).to_csv(metadata / "files.csv", index=False)
+    participants = pd.DataFrame(participant_rows)
+    recordings = pd.DataFrame(recording_rows)
+    inventory_columns = "file_name,participant_id,modality,method,role,rows,columns,description,rodbuk_tag"
+    documentation = [
+        {
+            "file_name": "00_readme.txt",
+            "participant_id": "",
+            "modality": "",
+            "method": "",
+            "role": "documentation",
+            "rows": "",
+            "columns": "",
+            "description": "Dataset description, protocol, column definitions, and the text for the RODBUK metadata form.",
+            "rodbuk_tag": "Documentation",
+        },
+        {
+            "file_name": "01_participants.csv",
+            "participant_id": "",
+            "modality": "",
+            "method": "",
+            "role": "documentation",
+            "rows": len(participants),
+            "columns": ",".join(participants.columns),
+            "description": "Anonymous participant codes S01-S12 and the start time of each session.",
+            "rodbuk_tag": "Documentation",
+        },
+        {
+            "file_name": "02_recordings.csv",
+            "participant_id": "",
+            "modality": "",
+            "method": "",
+            "role": "documentation",
+            "rows": len(recordings),
+            "columns": ",".join(recordings.columns),
+            "description": "Belt recorder settings and sample timing for each session.",
+            "rodbuk_tag": "Documentation",
+        },
+        {
+            "file_name": "03_protocol-phases.csv",
+            "participant_id": "",
+            "modality": "",
+            "method": "",
+            "role": "documentation",
+            "rows": len(phase_out),
+            "columns": ",".join(phase_out.columns),
+            "description": "Segmented apnea and hyperventilation windows on the belt clock.",
+            "rodbuk_tag": "Documentation",
+        },
+        {
+            "file_name": "04_file-list.csv",
+            "participant_id": "",
+            "modality": "",
+            "method": "",
+            "role": "documentation",
+            "rows": "",
+            "columns": inventory_columns,
+            "description": "Inventory of every file, with the description and tag to enter in the RODBUK Files tab.",
+            "rodbuk_tag": "Documentation",
+        },
+    ]
+    inventory = documentation + sorted(file_rows, key=lambda row: row["file_name"])
+    documentation[-1]["rows"] = len(inventory)
 
+    participants.to_csv(DEPOSIT / "01_participants.csv", index=False)
+    recordings.to_csv(DEPOSIT / "02_recordings.csv", index=False)
+    phase_out.to_csv(DEPOSIT / "03_protocol-phases.csv", index=False)
+    pd.DataFrame(inventory).to_csv(DEPOSIT / "04_file-list.csv", index=False)
     (DEPOSIT / "00_readme.txt").write_text(_readme(codes), encoding="utf-8", newline="\n")
-    (metadata / "00_readme.txt").write_text(
-        _folder_readme(
-            "Metadata",
-            "participants.csv lists S01-S12 with session date and time. It has no names.\n"
-            "recordings.csv holds session times and belt settings.\n"
-            "protocol_phases.csv holds segmented apnea and hyperventilation windows on the belt clock.\n"
-            "files.csv lists every data file in this package.",
-        ),
-        encoding="utf-8",
-        newline="\n",
-    )
-    (DEPOSIT / "02_reference-belt" / "00_readme.txt").write_text(
-        _folder_readme(
-            "Reference belt",
-            "RR_BeltRaw is the resistance export.\n"
-            "RR_BeltProcessed adds the filtered resistance and the reference respiratory rate.\n"
-            "Rgb and Tof in the file name are the two separate sessions of the same participant.",
-        ),
-        encoding="utf-8",
-        newline="\n",
-    )
-    (DEPOSIT / "03_rgb-optical-flow" / "00_readme.txt").write_text(
-        _folder_readme(
-            "RGB optical flow",
-            "Three files per participant, one per method: Farneback, Horn-Schunck, Lucas-Kanade.\n"
-            "They share one RGB session and one belt file.",
-        ),
-        encoding="utf-8",
-        newline="\n",
-    )
-    (DEPOSIT / "04_tof-depth" / "00_readme.txt").write_text(
-        _folder_readme(
-            "ToF depth",
-            "One depth file per participant.\n"
-            "This session is not simultaneous with the RGB session.",
-        ),
-        encoding="utf-8",
-        newline="\n",
-    )
-    print(f"Wrote {len(file_rows)} data files to {DEPOSIT}")
+    print(f"Wrote {len(inventory)} files to {DEPOSIT}")
 
 
 if __name__ == "__main__":
