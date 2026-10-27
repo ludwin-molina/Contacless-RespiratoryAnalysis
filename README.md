@@ -2,9 +2,7 @@
 
 ## Objective
 
-Compare a low-cost contactless respiratory-rate estimate with a chest belt. The camera signals are the waveforms already computed on the device. This repository does not contain video or raw image frames.
-
-The related manuscript is [docs/Computers_in_Biology_and_Medicine.pdf](docs/Computers_in_Biology_and_Medicine.pdf): *A Real-Time Low-Cost Platform for Non-Contact Respiratory Rate Monitoring*.
+The aim of the study was to develop a low-cost contactless respiratory-rate estimate based on RGB and ToF sensors. The acquisition script acquire respiratory signals are the waveforms already computed from the cameras. This repository does not contain video or raw image frames, in case do you have to acquire respiratory from video......
 
 ## Study
 
@@ -65,13 +63,6 @@ results/         tables and figures, recreated by the analysis, not versioned
 ```
 
 `acquisition/tof/grid.py` only shows the depth variance. It is not a fourth method. `data/reference/legacy_synced` is the archived alignment used to confirm that synchronization has not drifted. It is not a second copy of the raw study.
-
-## What stays off GitHub
-
-- `deposit/` is the flat file list for the RODBUK Files tab. It repeats the signals in comma-separated form, so it is not versioned. Rebuild it with `python -m analysis.export_deposit` and upload those files, not this git repository.
-- `data/private/` holds the S01–S12 name key.
-- `*.edf` are the vendor belt files.
-- `results/` is recreated by the analysis.
 
 ## Install and run
 
