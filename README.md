@@ -1,8 +1,8 @@
 # A real-time low-cost platform for contactless respiratory-rate monitoring
 
-This repository is the platform behind *A Real-Time Low-Cost Platform for Non-Contact Respiratory Rate Monitoring* (Computers in Biology and Medicine).
+This repository contains the platform presented in A Real-Time Low-Cost Platform for Non-Contact Respiratory Rate Monitoring (Computers in Biology and Medicine).
 
-The platform estimates respiratory rate from a chest signal computed on the device. The study signals and the piezoresistive chest belt recorded at the same time are in `data/`.
+The platform estimates respiratory rate from a chest-motion signal computed on the device. Study data and the simultaneously recorded reference signal from a piezoresistive chest belt are available in data/.
 
 ## Objective
 
