@@ -47,10 +47,76 @@ The study dataset is available through RODBUK:
 
 **RODBUK:** <!-- add the dataset URL here -->
 
-## Acquisition
+## Acquire a new recording
 
-Connect the MaixSense A075V and run the application corresponding to the desired modality:
+Connect the MaixSense A075V and run the application corresponding to the desired sensing modality:
 
 ```powershell
 python -m acquisition.rgb.app
 python -m acquisition.tof.app
+```
+
+RGB and ToF recordings are acquired separately because the sensor streams one modality at a time.
+
+For RGB acquisition, the pose-estimation model should be available at:
+
+```text
+acquisition/rgb/lightweight_pose_estimation_201912.onnx
+```
+
+Alternatively, its location can be specified using `POSE_ONNX`.
+
+The acquisition applications estimate the respiratory signal and respiratory rate in real time and store the recorded signals for subsequent analysis.
+
+## Reproduce the analysis
+
+Python 3.10 or newer is required.
+
+Place the study dataset in `data/`, then create the environment and run the analysis:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\activate
+pip install -r requirements.txt
+python -m pytest tests -q
+python -m analysis.run
+```
+
+The analysis synchronizes the camera-derived respiratory signals with the reference chest-belt signal and evaluates the performance of each method using:
+
+- Spearman correlation between respiratory signals,
+- mean absolute error (MAE) of respiratory rate,
+- Bland–Altman bias and limits of agreement, and
+- breath-hold detection performance.
+
+Generated tables and figures are saved in `results/`.
+
+## Repository structure
+
+```text
+acquisition/    RGB and ToF acquisition applications
+analysis/       Signal processing, synchronization, metrics, and figures
+data/           Study dataset
+docs/           Manuscript
+results/        Analysis results and figures
+tests/          Offline tests
+```
+
+## Citation
+
+If you use the platform or code, please cite:
+
+Jasiówka, D., Molina Arias, L., Ciężarek, P., & Żyźnawska, J. (2026). *A real-time low-cost platform for non-contact respiratory rate monitoring*. Computers in Biology and Medicine.
+
+If you use the study data, please also cite:
+
+Jasiówka, D., Molina Arias, L., Ciężarek, P., & Żyźnawska, J. (2026). *Contactless respiratory rate from RGB optical flow and ToF depth* [Data set]. AGH University of Krakow; Jagiellonian University Medical College.
+
+**Contact:** Ludwin Molina Arias, AGH University of Krakow  
+arias@agh.edu.pl
+
+## License
+
+The acquisition and analysis code is released under the MIT License. See [LICENSE](LICENSE).
+
+The dataset in `data/` and the manuscript in `docs/` are released under the Creative Commons Attribution 4.0 International License. See [LICENSE-DATA](LICENSE-DATA).
