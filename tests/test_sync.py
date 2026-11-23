@@ -1,11 +1,12 @@
 import numpy as np
 import pandas as pd
+import pytest
 
 from analysis.config import (
+    DATA,
     LEGACY_SYNCED,
     RGB_SIGNAL_COLUMN,
     RGB_SIGNAL_SIGN,
-    ROOT,
     TOF_SIGNAL_COLUMN,
     TOF_SIGNAL_SIGN,
 )
@@ -34,22 +35,28 @@ def test_missing_phase_time_stays_missing():
 
 
 def test_rgb_sync_matches_archived_s01():
+    legacy_path = LEGACY_SYNCED / "synced_S01_Farneback.csv"
+    if not legacy_path.is_file():
+        pytest.skip("local recordings archive is not present")
     aligned, _ = synchronize(
-        ROOT / "data/rgb/20260503_132612_Farneback.csv",
-        ROOT / "data/reference/processed_data-S01-rgb.csv",
+        DATA / "RR_Rgb_Farneback_S01_20260503.csv",
+        DATA / "RR_Belt_S01_Rgb_20260503.csv",
         RGB_SIGNAL_COLUMN,
         RGB_SIGNAL_SIGN,
     )
-    legacy = pd.read_csv(LEGACY_SYNCED / "synced_S01_Farneback.csv", sep=";")
+    legacy = pd.read_csv(legacy_path, sep=";")
     _compare(aligned, legacy, "RGB_Signal_ZScore", "RGB_BPM")
 
 
 def test_tof_sync_matches_archived_s01():
+    legacy_path = LEGACY_SYNCED / "synced_S01_ToF.csv"
+    if not legacy_path.is_file():
+        pytest.skip("local recordings archive is not present")
     aligned, _ = synchronize(
-        ROOT / "data/tof/20260503_131345_ToF.csv",
-        ROOT / "data/reference/processed_data-S01-tof.csv",
+        DATA / "RR_Tof_S01_20260503.csv",
+        DATA / "RR_Belt_S01_Tof_20260503.csv",
         TOF_SIGNAL_COLUMN,
         TOF_SIGNAL_SIGN,
     )
-    legacy = pd.read_csv(LEGACY_SYNCED / "synced_S01_ToF.csv", sep=";")
+    legacy = pd.read_csv(legacy_path, sep=";")
     _compare(aligned, legacy, "Lidar_Signal_ZScore", "Lidar_BPM")

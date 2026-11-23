@@ -11,14 +11,9 @@ acquisition/tof/recordings/
 results/*
 !results/.gitkeep
 
-# Name key for S01-S12. Local only. Never commit or deposit it.
-data/private/
+# Local archive used only to rebuild Data/. Not the analysis input.
+recordings/
+Recordings/
 
-# RODBUK upload set. It is a reformatted copy of data/, rebuilt by
-# python -m analysis.export_deposit. Keep it off GitHub so the signals
-# are not stored twice.
-deposit/
-
-# Vendor belt files. The text export in data/belt is the copy the
-# analysis and the deposit use.
+# Vendor belt files. The open copy is the text export in the local archive.
 *.edf

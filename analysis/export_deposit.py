@@ -1,8 +1,9 @@
-"""Build the RODBUK deposit as one flat list of files.
+"""Build the RODBUK package in ``Data/`` from the local ``recordings/`` archive.
 
 The web form stores files, not folders. Names sort the documentation ahead of
 the signals. Tables are comma-separated, dates are ISO, and participant codes
-are S01-S12. Vendor EDF files and empty annotation files are left out.
+are S01-S12. Each session has one belt file with the raw resistance and the
+filtered reference. Vendor EDF files and empty annotation files are left out.
 """
 
 import csv
@@ -12,9 +13,9 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from analysis.config import PHASES_PATH, ROOT, load_manifest
+from analysis.config import DATA, archive_root
 
-DEPOSIT = ROOT / "deposit"
+PACKAGE = DATA
 SENSOR_STAMP = re.compile(r"(\d{8})_(\d{6})")
 PREFILTER = re.compile(r"HP:([0-9.]+)Hz LP:([0-9.]+)Hz")
 FORBIDDEN = set(" !?*&#~@$%^&()`;?,'\"[]{}")
@@ -47,10 +48,32 @@ def _write_exact(destination, header, body_lines):
     payload = header + "\n" + "\n".join(body_lines) + "\n"
     destination.parent.mkdir(parents=True, exist_ok=True)
     destination.write_text(payload, encoding="utf-8", newline="\n")
-    relative = destination.relative_to(DEPOSIT).as_posix()
+    relative = destination.relative_to(PACKAGE).as_posix()
     if any(character in FORBIDDEN or ord(character) > 127 for character in relative):
         raise ValueError(f"Deposit path is not RODBUK-safe: {relative}")
     return relative
+
+
+def _archive_path(archive: Path, relative) -> Path:
+    text = Path(str(relative)).as_posix()
+    if text.startswith("data/"):
+        text = text[len("data/") :]
+    return archive / text
+
+
+def _load_archive(archive: Path):
+    manifest_path = archive / "manifest.csv"
+    phases_path = archive / "annotations" / "phases.csv"
+    if not manifest_path.is_file():
+        raise FileNotFoundError(
+            "The local recordings archive is not present. "
+            f"Expected {manifest_path} so Data/ can be rebuilt."
+        )
+    if not phases_path.is_file():
+        raise FileNotFoundError(f"The archive has no phase table: {phases_path}")
+    manifest = pd.read_csv(manifest_path)
+    phases = pd.read_csv(phases_path)
+    return manifest, phases
 
 
 def _body(path):
@@ -122,10 +145,13 @@ The RODBUK form accepts files. Upload every file in this folder. Do not upload t
 04_file-list.csv
     One row per file, with the description and the tag to type into the Files tab.
 
-Signal files use the pattern RR_<source>_<method>_Sxx_YYYYMMDD.csv.
+Signal files use these patterns:
+    RR_Belt_Sxx_Rgb_YYYYMMDD.csv
+    RR_Belt_Sxx_Tof_YYYYMMDD.csv
+    RR_Rgb_<method>_Sxx_YYYYMMDD.csv
+    RR_Tof_Sxx_YYYYMMDD.csv
 Examples:
-    RR_BeltRaw_S05_Rgb_20260505.csv
-    RR_BeltProcessed_S05_Rgb_20260505.csv
+    RR_Belt_S05_Rgb_20260505.csv
     RR_Rgb_Farneback_S05_20260505.csv
     RR_Rgb_Horn-Schunck_S05_20260505.csv
     RR_Rgb_Lucas-Kanade_S05_20260505.csv
@@ -169,16 +195,12 @@ Select all files from this folder. For each file, copy description and rodbuk_ta
 Formats
 All tables are UTF-8 comma-separated values with a header row. Open them in any spreadsheet or with pandas.read_csv. No EDF files are included: the Neurobit text export is the open copy of the same resistance samples. Empty annotation files are not included.
 
-Belt raw columns
+Belt columns
 Time_s: seconds from the first sample
 Resistance_kOhm: chest-belt resistance in kilohms
-Sample period 0.064 s (16 samples in each 1.024 s record, 15.625 Hz). Hardware filters are in 02_recordings.csv (high-pass 0 Hz, low-pass 5.78125 Hz).
-
-Belt processed columns
-Time_s: same clock as the raw file
-Resistance_kOhm: same resistance samples
 Filtered: band-pass of the resistance, Butterworth order 3, 0.05 to 1.5 Hz
 RespiratoryRate_bpm: reference rate in breaths per minute. During the breath-hold this column is 0.
+Sample period 0.064 s (16 samples in each 1.024 s record, 15.625 Hz). Hardware filters are in 02_recordings.csv (high-pass 0 Hz, low-pass 5.78125 Hz). The raw resistance and the filtered reference share this clock, so they are stored in the same file.
 
 RGB optical-flow columns
 TimeUnix_s: device clock, seconds since 1970-01-01
@@ -201,6 +223,7 @@ Pairing of each sensor file with its belt uses the belt start time. Phase window
 
 Change log
 2026-10-27: package prepared for RODBUK. Phase windows segmented from the reference rate because the annotation files were empty.
+2026-11-23: raw resistance and the filtered reference are stored in one belt file per session.
 
 Recommended software
 A text editor or spreadsheet for the CSV files. Python with pandas is enough to reload them. No proprietary viewer is required.
@@ -210,10 +233,11 @@ A text editor or spreadsheet for the CSV files. Python with pandas is enough to 
 def _describe(role, code, modality, method, date):
     iso = f"{date[:4]}-{date[4:6]}-{date[6:8]}"
     session = "RGB" if modality == "rgb" else "ToF"
-    if role == "belt-raw":
-        text = f"Raw chest-belt resistance for participant {code}, {session} session, {iso}."
-    elif role == "belt-processed":
-        text = f"Filtered chest-belt signal and reference respiratory rate for participant {code}, {session} session, {iso}."
+    if role == "belt":
+        text = (
+            f"Chest-belt resistance, filtered signal, and reference respiratory rate "
+            f"for participant {code}, {session} session, {iso}."
+        )
     elif modality == "rgb":
         text = f"{method} optical-flow respiratory signal for participant {code}, RGB session, {iso}."
     else:
@@ -221,18 +245,21 @@ def _describe(role, code, modality, method, date):
     return text
 
 
-def export_deposit():
-    manifest = load_manifest()
-    codes = participant_codes(manifest)
-    phases = pd.read_csv(PHASES_PATH)
-    if DEPOSIT.exists():
-        for path in sorted(DEPOSIT.rglob("*"), reverse=True):
+def _reset(directory: Path):
+    if directory.exists():
+        for path in sorted(directory.rglob("*"), reverse=True):
             if path.is_file():
                 path.unlink()
-        for path in sorted(DEPOSIT.rglob("*"), reverse=True):
-            if path.is_dir():
+            elif path.is_dir():
                 path.rmdir()
-    DEPOSIT.mkdir(parents=True, exist_ok=True)
+    directory.mkdir(parents=True, exist_ok=True)
+
+
+def export_deposit():
+    archive = archive_root()
+    manifest, phases = _load_archive(archive)
+    codes = participant_codes(manifest)
+    _reset(PACKAGE)
 
     file_rows = []
     recording_rows = []
@@ -258,7 +285,7 @@ def export_deposit():
         session_key = (record.subject, modality)
         if session_key not in seen_sessions:
             seen_sessions.add(session_key)
-            belt_dir = ROOT / "data" / "belt" / modality
+            belt_dir = archive / "belt" / modality
             header = _table(belt_dir / f"record-{record.subject}-{modality}_header.txt")
             signals = _table(belt_dir / f"record-{record.subject}-{modality}_signals.txt")
             prefilter = PREFILTER.search(signals["PreFilter"])
@@ -266,38 +293,25 @@ def export_deposit():
                 raise ValueError(f"Unparsed belt filter for {record.subject} {modality}")
             sample_period = float(header["Duration"]) / float(signals["Smp/Rec"])
             raw_lines = _body(belt_dir / f"record-{record.subject}-{modality}_data.txt")
-            raw_name = f"RR_BeltRaw_{code}_{modality.capitalize()}_{date}.csv"
-            raw_rel = _write_exact(DEPOSIT / raw_name, "Time_s,Resistance_kOhm", raw_lines)
+            processed_lines = _body(_archive_path(archive, record.reference_file))
+            if len(raw_lines) != len(processed_lines):
+                raise ValueError(
+                    f"Belt raw and processed lengths differ for {record.subject} {modality}: "
+                    f"{len(raw_lines)} vs {len(processed_lines)}"
+                )
+            belt_name = f"RR_Belt_{code}_{modality.capitalize()}_{date}.csv"
+            belt_columns = "Time_s,Resistance_kOhm,Filtered,RespiratoryRate_bpm"
+            belt_rel = _write_exact(PACKAGE / belt_name, belt_columns, processed_lines)
             file_rows.append(
                 {
-                    "file_name": raw_rel,
+                    "file_name": belt_rel,
                     "participant_id": code,
                     "modality": modality,
                     "method": "",
-                    "role": "belt-raw",
-                    "rows": len(raw_lines),
-                    "columns": "Time_s,Resistance_kOhm",
-                    "description": _describe("belt-raw", code, modality, "", date),
-                    "rodbuk_tag": "Data",
-                }
-            )
-            processed_lines = _body(ROOT / record.reference_file)
-            processed_name = f"RR_BeltProcessed_{code}_{modality.capitalize()}_{date}.csv"
-            processed_rel = _write_exact(
-                DEPOSIT / processed_name,
-                "Time_s,Resistance_kOhm,Filtered,RespiratoryRate_bpm",
-                processed_lines,
-            )
-            file_rows.append(
-                {
-                    "file_name": processed_rel,
-                    "participant_id": code,
-                    "modality": modality,
-                    "method": "",
-                    "role": "belt-processed",
+                    "role": "belt",
                     "rows": len(processed_lines),
-                    "columns": "Time_s,Resistance_kOhm,Filtered,RespiratoryRate_bpm",
-                    "description": _describe("belt-processed", code, modality, "", date),
+                    "columns": belt_columns,
+                    "description": _describe("belt", code, modality, "", date),
                     "rodbuk_tag": "Data",
                 }
             )
@@ -320,8 +334,9 @@ def export_deposit():
             )
             recording_index[session_key] = len(recording_rows) - 1
 
-        n_samples, period = _sensor_period(ROOT / record.sensor_file)
-        sensor_lines = _body(ROOT / record.sensor_file)
+        sensor_path = _archive_path(archive, record.sensor_file)
+        n_samples, period = _sensor_period(sensor_path)
+        sensor_lines = _body(sensor_path)
         sensor_lines = [line.replace(";", ",") for line in sensor_lines]
         if len(sensor_lines) != n_samples:
             raise ValueError(f"Row count mismatch in {record.sensor_file}")
@@ -333,7 +348,7 @@ def export_deposit():
             method_token = "Tof"
             header_line = "TimeUnix_s,Elapsed_s,Distance_mm,DistanceFiltered,RespiratoryRate_bpm,IsApnea"
             file_name = f"RR_Tof_{code}_{date}.csv"
-        relative = _write_exact(DEPOSIT / file_name, header_line, sensor_lines)
+        relative = _write_exact(PACKAGE / file_name, header_line, sensor_lines)
         file_rows.append(
             {
                 "file_name": relative,
@@ -422,12 +437,12 @@ def export_deposit():
     inventory = documentation + sorted(file_rows, key=lambda row: row["file_name"])
     documentation[-1]["rows"] = len(inventory)
 
-    participants.to_csv(DEPOSIT / "01_participants.csv", index=False)
-    recordings.to_csv(DEPOSIT / "02_recordings.csv", index=False)
-    phase_out.to_csv(DEPOSIT / "03_protocol-phases.csv", index=False)
-    pd.DataFrame(inventory).to_csv(DEPOSIT / "04_file-list.csv", index=False)
-    (DEPOSIT / "00_readme.txt").write_text(_readme(codes), encoding="utf-8", newline="\n")
-    print(f"Wrote {len(inventory)} files to {DEPOSIT}")
+    participants.to_csv(PACKAGE / "01_participants.csv", index=False)
+    recordings.to_csv(PACKAGE / "02_recordings.csv", index=False)
+    phase_out.to_csv(PACKAGE / "03_protocol-phases.csv", index=False)
+    pd.DataFrame(inventory).to_csv(PACKAGE / "04_file-list.csv", index=False)
+    (PACKAGE / "00_readme.txt").write_text(_readme(codes), encoding="utf-8", newline="\n")
+    print(f"Wrote {len(inventory)} files to {PACKAGE}")
 
 
 if __name__ == "__main__":

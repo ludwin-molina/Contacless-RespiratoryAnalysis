@@ -12,7 +12,17 @@ import pandas as pd
 from scipy.interpolate import interp1d
 from scipy.stats import zscore
 
-from analysis.config import FS, MAX_LAG_SEC, MIN_ALIGNED_SEC
+from analysis.config import (
+    BELT_BPM_COLUMN,
+    BELT_SIGNAL_COLUMN,
+    BELT_TIME_COLUMN,
+    FS,
+    MAX_LAG_SEC,
+    MIN_ALIGNED_SEC,
+    SENSOR_APNEA_COLUMN,
+    SENSOR_BPM_COLUMN,
+    SENSOR_TIME_COLUMN,
+)
 
 
 def _fill_nan(values):
@@ -41,20 +51,20 @@ def synchronize(sensor_file, reference_file, signal_column, signal_sign, fs=FS):
 
     ``signal_sign`` is -1 for both RGB optical flow and filtered ToF depth:
     that is the polarity that matches the archived synchronized files.
-    ``Is_Apnea`` is carried through the same lag as the waveform. Samples that
+    ``IsApnea`` is carried through the same lag as the waveform. Samples that
     would be dropped by an extreme lag fall back to zero lag.
     """
-    sensor = pd.read_csv(sensor_file, sep=";")
-    reference = pd.read_csv(reference_file, sep=",")
+    sensor = pd.read_csv(sensor_file)
+    reference = pd.read_csv(reference_file)
 
-    sensor_time = _fill_nan(sensor["Elapsed_Sec"])
-    reference_time = _fill_nan(reference["Time"])
+    sensor_time = _fill_nan(sensor[SENSOR_TIME_COLUMN])
+    reference_time = _fill_nan(reference[BELT_TIME_COLUMN])
     sensor_signal = signal_sign * _fill_nan(sensor[signal_column])
-    reference_signal = _fill_nan(reference["Filtered"])
-    sensor_bpm = _fill_nan(sensor["BPM"])
-    reference_bpm = _fill_nan(reference["BPM"])
-    if "Is_Apnea" in sensor.columns:
-        sensor_apnea = _fill_nan(sensor["Is_Apnea"])
+    reference_signal = _fill_nan(reference[BELT_SIGNAL_COLUMN])
+    sensor_bpm = _fill_nan(sensor[SENSOR_BPM_COLUMN])
+    reference_bpm = _fill_nan(reference[BELT_BPM_COLUMN])
+    if SENSOR_APNEA_COLUMN in sensor.columns:
+        sensor_apnea = _fill_nan(sensor[SENSOR_APNEA_COLUMN])
     else:
         sensor_apnea = np.zeros(len(sensor_time))
 

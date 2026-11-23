@@ -13,7 +13,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from analysis.config import PHASES_PATH, ROOT
+from analysis.config import PHASES_PATH
 
 
 def _runs(mask):
@@ -120,22 +120,15 @@ def infer_phase_windows(reference):
 
 
 def ensure_phases(manifest, path: Path = PHASES_PATH):
-    """Load phase windows, writing them from the reference rate the first time."""
-    path.parent.mkdir(parents=True, exist_ok=True)
-    if path.exists():
-        return pd.read_csv(path)
-
-    rows = []
-    seen = set()
-    for record in manifest.itertuples(index=False):
-        key = (record.subject, record.modality)
-        if key in seen:
-            continue
-        seen.add(key)
-        reference = pd.read_csv(ROOT / record.reference_file)
-        windows = infer_phase_windows(reference)
-        rows.append({"subject": record.subject, "modality": record.modality, **windows})
-
-    phases = pd.DataFrame(rows)
-    phases.to_csv(path, index=False)
+    """Load the protocol windows published in ``Data/03_protocol-phases.csv``."""
+    if not path.is_file():
+        raise FileNotFoundError(f"Protocol phases are not in the dataset: {path}")
+    phases = pd.read_csv(path)
+    if "participant_id" in phases.columns:
+        phases = phases.rename(columns={"participant_id": "subject"})
+    needed = {(row.subject, row.modality) for row in manifest.itertuples(index=False)}
+    present = {(row.subject, row.modality) for row in phases.itertuples(index=False)}
+    missing = needed.difference(present)
+    if missing:
+        raise ValueError(f"Protocol phases are missing sessions: {sorted(missing)}")
     return phases
