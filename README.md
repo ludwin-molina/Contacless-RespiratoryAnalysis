@@ -2,7 +2,7 @@
 
 This repository contains the platform developed for non-contact respiratory rate monitoring using RGB and time-of-flight (ToF) cameras. Respiratory signals are extracted from chest motion and processed on the device to estimate respiratory rate in real time.
 
-The repository also contains the data and analysis used to validate the platform against a piezoresistive chest belt.
+The repository also contains the analysis used to validate the platform against a piezoresistive chest belt.
 
 ## Overview
 
