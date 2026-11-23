@@ -11,7 +11,11 @@ acquisition/tof/recordings/
 results/*
 !results/.gitkeep
 
-# Local archive used only to rebuild Data/. Not the analysis input.
+# Study dataset. Download it from RODBUK into data/.
+data/
+Data/
+
+# Local archive used to rebuild data/.
 recordings/
 Recordings/
 

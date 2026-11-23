@@ -5,7 +5,7 @@ from pathlib import Path
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
-DATA = ROOT / "Data"
+DATA = ROOT / "data"
 RESULTS = ROOT / "results"
 FILE_LIST_PATH = DATA / "04_file-list.csv"
 RECORDINGS_TABLE_PATH = DATA / "02_recordings.csv"
@@ -76,7 +76,7 @@ def load_manifest(
     file_list_path: Path = FILE_LIST_PATH,
     recordings_path: Path = RECORDINGS_TABLE_PATH,
 ) -> pd.DataFrame:
-    """Build the cohort index from the RODBUK tables in ``Data/``.
+    """Build the cohort index from the RODBUK tables in ``data/``.
 
     ``04_file-list.csv`` pairs each sensor file with its belt file.
     ``02_recordings.csv`` supplies the belt start time. Paths are relative
@@ -98,7 +98,7 @@ def load_manifest(
         how="left",
     )
     if merged["reference_name"].eq("").any() or merged["session_start"].eq("").any():
-        raise ValueError("A sensor file has no belt file or no session start in Data/")
+        raise ValueError("A sensor file has no belt file or no session start in data/")
 
     manifest = pd.DataFrame(
         {

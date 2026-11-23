@@ -65,7 +65,7 @@ def write_report(summary, phases, path: Path):
         "Bland–Altman bias drops samples whose reference rate is zero.",
         "Differences from the published numbers are reported as computed. Thresholds are not adjusted to force a match.",
         "",
-        "Phase windows in `Data/03_protocol-phases.csv` are segmented from the reference rate.",
+        "Phase windows in `data/03_protocol-phases.csv` are segmented from the reference rate.",
         "The belt annotation files contain only the header `Onset,Duration,Annotation`, so the original clicks were not available.",
         "Apnea is the longest stretch at 0 breaths per minute (at least 10 s).",
         "Hyperventilation is the tallest smoothed bout before that stretch: at least 8 s, and at least 4 breaths per minute above the resting level.",

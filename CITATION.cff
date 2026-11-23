@@ -1,5 +1,5 @@
 cff-version: 1.2.0
-message: If you use this platform or the dataset in Data/, please cite the paper and the dataset.
+message: If you use this platform or the dataset in data/, please cite the paper and the dataset.
 title: Contactless respiratory rate from RGB optical flow and ToF depth
 type: software
 license: MIT

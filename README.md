@@ -1,8 +1,8 @@
 # A real-time low-cost platform for contactless respiratory-rate monitoring
 
-This repository is the platform and the study dataset behind *A Real-Time Low-Cost Platform for Non-Contact Respiratory Rate Monitoring* (Computers in Biology and Medicine).
+This repository is the platform behind *A Real-Time Low-Cost Platform for Non-Contact Respiratory Rate Monitoring* (Computers in Biology and Medicine).
 
-The platform estimates respiratory rate from a chest signal computed on the device. The files in `Data/` are those respiratory signals, together with a piezoresistive chest belt recorded at the same time. They are not camera video. The same folder is the package prepared for RODBUK AGH.
+The platform estimates respiratory rate from a chest signal computed on the device. The study signals and the piezoresistive chest belt recorded at the same time are in `data/`.
 
 ## Objective
 
@@ -28,23 +28,25 @@ The depth pipeline tracks a region on the subject and uses the mean distance in 
 
 Twelve adults, coded S01–S12, were recorded from 3 to 9 May 2026. Each person completed two sessions. Inside a session the order is resting breathing, voluntary hyperventilation, a return toward the resting rate, and a breath-hold of about 30 s. The breath-hold is the apnea interval.
 
-`Data/03_protocol-phases.csv` gives the apnea and hyperventilation windows for each session, in seconds from the first belt sample. `Data/04_file-list.csv` lists every file. `Data/02_recordings.csv` gives the belt settings and the session start used to pair each sensor file with its belt.
+`data/03_protocol-phases.csv` gives the apnea and hyperventilation windows for each session, in seconds from the first belt sample. `data/04_file-list.csv` lists every file. `data/02_recordings.csv` gives the belt settings and the session start used to pair each sensor file with its belt.
 
 ## Dataset
 
-`Data/` is a flat list of comma-separated files. Upload those files to RODBUK; do not upload the folder as a directory. `Data/00_readme.txt` has the column definitions and the text for the repository form.
+Download the RODBUK package and place the files in `data/`.
 
-Each RGB session and each ToF session has its own belt file. The three optical-flow methods stay in separate files, because each method logs its own clock. The camera and the belt are not row-aligned in these files. The analysis places them on one 20 Hz grid.
+RODBUK: <!-- add the dataset URL here -->
+
+`data/` is a flat list of comma-separated files. `data/00_readme.txt` defines the columns. Each RGB session and each ToF session has its own belt file. Each optical-flow method has its own file, on the clock logged by that method. The analysis places the camera signal and the belt on one 20 Hz grid.
 
 | Path | Contents |
 | --- | --- |
-| `Data/RR_Belt_Sxx_Rgb_YYYYMMDD.csv` and `Data/RR_Belt_Sxx_Tof_YYYYMMDD.csv` | Belt resistance, band-pass filtered resistance (Butterworth, order 3, 0.05–1.5 Hz), and reference rate in breaths per minute. The rate is 0 during the breath-hold. |
-| `Data/RR_Rgb_*_Sxx_YYYYMMDD.csv` | Chest motion from Farnebäck, Horn–Schunck, or Lucas–Kanade. One file per method. |
-| `Data/RR_Tof_Sxx_YYYYMMDD.csv` | Raw and filtered depth, with the rate estimated on the device. |
-| `Data/01_participants.csv` | Codes S01–S12 and the start of each session. No names. |
-| `Data/02_recordings.csv` | Belt recorder settings and sample timing. |
-| `Data/03_protocol-phases.csv` | Apnea and hyperventilation windows. |
-| `Data/04_file-list.csv` | One row per file, with the RODBUK description and tag. |
+| `data/RR_Belt_Sxx_Rgb_YYYYMMDD.csv` and `data/RR_Belt_Sxx_Tof_YYYYMMDD.csv` | Belt resistance, band-pass filtered resistance (Butterworth, order 3, 0.05–1.5 Hz), and reference rate in breaths per minute. The rate is 0 during the breath-hold. |
+| `data/RR_Rgb_*_Sxx_YYYYMMDD.csv` | Chest motion from Farnebäck, Horn–Schunck, or Lucas–Kanade. One file per method. |
+| `data/RR_Tof_Sxx_YYYYMMDD.csv` | Raw and filtered depth, with the rate estimated on the device. |
+| `data/01_participants.csv` | Codes S01–S12 and the start of each session. No names. |
+| `data/02_recordings.csv` | Belt recorder settings and sample timing. |
+| `data/03_protocol-phases.csv` | Apnea and hyperventilation windows. |
+| `data/04_file-list.csv` | One row per file, with the RODBUK description and tag. |
 
 Belt columns: `Time_s`, `Resistance_kOhm`, `Filtered`, `RespiratoryRate_bpm`.
 
@@ -52,9 +54,9 @@ RGB columns: `TimeUnix_s`, `Elapsed_s`, `OpticalFlow`, `OpticalFlow_sd`, `Respir
 
 ToF columns: `TimeUnix_s`, `Elapsed_s`, `Distance_mm`, `DistanceFiltered`, `RespiratoryRate_bpm`, `IsApnea`.
 
-`IsApnea` is the device flag. The protocol breath-hold is the window in `Data/03_protocol-phases.csv`.
+`IsApnea` is the device flag. The protocol breath-hold is the window in `data/03_protocol-phases.csv`.
 
-`recordings/` is a local archive of the device exports, the Neurobit text files, and the older synchronized traces. It is not read by the analysis and it is not part of the git repository. When that archive is present, rebuild the package with:
+With the local `recordings/` archive present, rebuild `data/` with:
 
 ```powershell
 python -m analysis.export_deposit
@@ -70,7 +72,7 @@ python -m acquisition.tof.app
 python -m acquisition.tof.grid
 ```
 
-The RGB page listens on port 5000, the ToF page on 8080, and the depth-variance view on 8081. Override the defaults with `MAIX_HOST`, `MAIX_PORT`, `RGB_PORT`, `TOF_PORT`, and `TOF_GRID_PORT`. New sessions are written to `acquisition/rgb/recordings` and `acquisition/tof/recordings`. Start the Neurobit belt for the same session. Those live folders are not the study dataset in `Data/`.
+The RGB page listens on port 5000, the ToF page on 8080, and the depth-variance view on 8081. Override the defaults with `MAIX_HOST`, `MAIX_PORT`, `RGB_PORT`, `TOF_PORT`, and `TOF_GRID_PORT`. Sessions are written to `acquisition/rgb/recordings` and `acquisition/tof/recordings`. Start the Neurobit belt for the same session.
 
 The apps write semicolon-separated files. An RGB file has `Timestamp_Abs`, `Elapsed_Sec`, `Signal_Pos`, `Signal_Std`, `BPM`, and `Is_Apnea`. A ToF file has `Timestamp_Abs`, `Elapsed_Sec`, `Signal_Raw_mm`, `Signal_Filtered`, `BPM`, and `Is_Apnea`.
 
@@ -83,7 +85,7 @@ python -m acquisition.tof.data_plotter
 
 ## Reproduce the comparison
 
-Python 3.10 or newer.
+Python 3.10 or newer. Place the RODBUK files in `data/` first.
 
 ```powershell
 python -m venv .venv
@@ -93,7 +95,7 @@ python -m pytest tests -q
 python -m analysis.run
 ```
 
-`python -m analysis.run` reads `Data/`. It places the camera signal and the belt on one 20 Hz grid, z-scores both waveforms, and aligns them by cross-correlation. It then reports:
+`python -m analysis.run` reads `data/`. It places the camera signal and the belt on one 20 Hz grid, z-scores both waveforms, and aligns them by cross-correlation. It then reports:
 
 - Spearman correlation of the waveforms
 - mean absolute error of respiratory rate, one sample per second over the whole recording
@@ -108,12 +110,12 @@ On these recordings the correlation medians are ToF 0.634, Farnebäck 0.630, Hor
 
 ```text
 acquisition/    RGB and ToF apps for a live MaixSense
-analysis/       alignment, metrics, figures, and the Data/ builder
-Data/           study signals in the RODBUK file list
+analysis/       alignment, metrics, figures, and the data/ builder
+data/           study files downloaded from RODBUK
 docs/           manuscript PDF
 results/        tables and figures from the analysis
 tests/          offline checks
-recordings/     optional local archive, ignored by git
+recordings/     local archive used to rebuild data/
 ```
 
 ## Cite
@@ -124,7 +126,7 @@ Jasiówka, D., Molina Arias, L., Ciężarek, P., & Żyźnawska, J. (2026). A rea
 
 Cite the dataset as:
 
-Jasiówka, D., Molina Arias, L., Ciężarek, P., & Żyźnawska, J. (2026). *Contactless respiratory rate from RGB optical flow and ToF depth* [Data set]. AGH University of Krakow; Jagiellonian University Medical College.
+Jasiówka, D., Molina Arias, L., Ciężarek, P., & Żyźnawska, J. (2026). *Contactless respiratory rate from RGB optical flow and ToF depth* [Data set]. AGH University of Krakow; Jagiellonian University Medical College. The RODBUK link is in the Dataset section.
 
 Contact: Ludwin Molina Arias, AGH University of Krakow, arias@agh.edu.pl.
 
@@ -132,4 +134,4 @@ Contact: Ludwin Molina Arias, AGH University of Krakow, arias@agh.edu.pl.
 
 The acquisition and analysis code is released under the MIT License. See [LICENSE](LICENSE).
 
-The dataset in `Data/` and the manuscript in `docs/` are released under Creative Commons Attribution 4.0 International. See [LICENSE-DATA](LICENSE-DATA).
+The dataset in `data/` and the manuscript in `docs/` are released under Creative Commons Attribution 4.0 International. See [LICENSE-DATA](LICENSE-DATA).

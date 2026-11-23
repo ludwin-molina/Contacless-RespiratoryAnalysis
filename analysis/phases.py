@@ -120,7 +120,7 @@ def infer_phase_windows(reference):
 
 
 def ensure_phases(manifest, path: Path = PHASES_PATH):
-    """Load the protocol windows published in ``Data/03_protocol-phases.csv``."""
+    """Load the protocol windows published in ``data/03_protocol-phases.csv``."""
     if not path.is_file():
         raise FileNotFoundError(f"Protocol phases are not in the dataset: {path}")
     phases = pd.read_csv(path)

@@ -1,4 +1,4 @@
-"""Build the RODBUK package in ``Data/`` from the local ``recordings/`` archive.
+"""Build the RODBUK package in ``data/`` from the local ``recordings/`` archive.
 
 The web form stores files, not folders. Names sort the documentation ahead of
 the signals. Tables are comma-separated, dates are ISO, and participant codes
@@ -67,7 +67,7 @@ def _load_archive(archive: Path):
     if not manifest_path.is_file():
         raise FileNotFoundError(
             "The local recordings archive is not present. "
-            f"Expected {manifest_path} so Data/ can be rebuilt."
+            f"Expected {manifest_path} so data/ can be rebuilt."
         )
     if not phases_path.is_file():
         raise FileNotFoundError(f"The archive has no phase table: {phases_path}")
